@@ -992,43 +992,63 @@ const mouse = new THREE.Vector2();
  * AURA | DNA 双螺旋结构渲染器
  * 核心逻辑：将海报分布在两条交织的螺旋线上，中心留白以保证文字可读性
  */
+/**
+ * AURA | DNA 双螺旋结构渲染器 (全平台适配版)
+ * 自动识别手机/电脑端并调整螺旋形态
+ */
 function initMovieGlobe(movieData) {
     const container = document.getElementById('three-canvas-container');
     if (!container) return;
 
+    // --- 1. 环境检测与响应式参数 ---
+    const isMobile = window.innerWidth < 768;
+    
+    // 手机端参数：更窄的半径(160)，更大的垂直间距(25)，更少的海报(60)
+    // 电脑端参数：原本的半径(420)，垂直间距(12)，海报(120)
+    const settings = {
+        radius: isMobile ? 160 : 420,
+        heightStep: isMobile ? 25 : 12,
+        postersCount: isMobile ? 60 : 120,
+        cameraZ: isMobile ? 800 : 700, // 手机端相机拉远一点
+        fov: isMobile ? 70 : 55        // 手机端视角调广一点
+    };
+
     const scene = new THREE.Scene();
-    // 使用更广的视野，让侧边的螺旋更有立体感
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.z = 700;
+    const camera = new THREE.PerspectiveCamera(settings.fov, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.z = settings.cameraZ;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // 清除旧的 canvas（防止重复初始化）
+    container.innerHTML = ''; 
     container.appendChild(renderer.domElement);
 
     const dnaGroup = new THREE.Group();
     scene.add(dnaGroup);
 
-    // 过滤并选择 120 部电影海报，数量越多螺旋越密集
+    // 过滤并选择电影
     const validMovies = movieData.filter(m => m.poster_path && m.poster_path !== "Unknown");
-    const selectedMovies = validMovies.sort(() => 0.5 - Math.random()).slice(0, 120);
+    const selectedMovies = validMovies.sort(() => 0.5 - Math.random()).slice(0, settings.postersCount);
 
     const loader = new THREE.TextureLoader();
 
     selectedMovies.forEach((movie, i) => {
-        // --- DNA 螺旋算法 ---
-        const strand = i % 2;           // 0 或 1，代表两条不同的螺旋链
-        const angle = i * 0.25;         // 每个海报之间的旋转增量
-        const radius = 420;             // 螺旋直径，调大它可以让中心区域更空旷，文字更清晰
-        const heightStep = 12;          // 每个海报在垂直方向上的间距
+        // --- 2. DNA 螺旋核心算法 ---
+        const strand = i % 2;           
+        const angle = i * 0.25;         
         
-        // 计算 X, Y, Z 坐标
-        // 两条链通过在角度上增加 Math.PI (180度) 来实现交织
-        const x = radius * Math.cos(angle + (strand * Math.PI));
-        const y = (i * heightStep) - (selectedMovies.length * heightStep / 2); // 居中垂直分布
-        const z = radius * Math.sin(angle + (strand * Math.PI));
+        // 使用 settings 中的响应式数值
+        const x = settings.radius * Math.cos(angle + (strand * Math.PI));
+        const y = (i * settings.heightStep) - (selectedMovies.length * settings.heightStep / 2);
+        const z = settings.radius * Math.sin(angle + (strand * Math.PI));
 
-        const geometry = new THREE.PlaneGeometry(38, 56); // 海报尺寸
+        // 手机上海报尺寸稍微调大一点点方便点击
+        const posterW = isMobile ? 45 : 38;
+        const posterH = isMobile ? 66 : 56;
+
+        const geometry = new THREE.PlaneGeometry(posterW, posterH);
         const material = new THREE.MeshBasicMaterial({ 
             map: loader.load(`https://image.tmdb.org/t/p/w200${movie.poster_path}`),
             side: THREE.DoubleSide,
@@ -1038,37 +1058,22 @@ function initMovieGlobe(movieData) {
 
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(x, y, z);
-        
-        // 让海报的方向始终垂直于螺旋切线，面向外部
         mesh.rotation.y = -angle - (strand * Math.PI);
-        
-        // 存储数据用于点击跳转
         mesh.userData = { title: movie.title };
         dnaGroup.add(mesh);
     });
 
     container.style.pointerEvents = "auto";
 
-    /**
-     * 每一帧渲染逻辑
-     */
+    // --- 3. 动画循环 ---
     function animate() {
         requestAnimationFrame(animate);
-        
-        // 1. 缓慢自转
         dnaGroup.rotation.y += 0.003;
-        
-        // 2. 模拟轻微的呼吸浮动感
         dnaGroup.position.y = Math.sin(Date.now() * 0.0005) * 15;
 
-        // 3. 动态景深逻辑：根据 Z 轴位置调整透明度
-        // 这能让后方的海报变淡，防止干扰文字
         dnaGroup.children.forEach(child => {
             const worldVector = new THREE.Vector3();
             child.getWorldPosition(worldVector);
-            
-            // 越靠近相机的 Z 轴数值越大
-            // 这里的公式：将 Z 轴映射到 0.1 到 0.9 的透明度区间
             let dist = worldVector.z / 300; 
             child.material.opacity = Math.max(0.1, Math.min(0.9, 0.5 + dist));
         });
@@ -1077,26 +1082,28 @@ function initMovieGlobe(movieData) {
     }
     animate();
 
-    // --- 点击交互逻辑 ---
+    // --- 4. 交互逻辑 ---
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    container.addEventListener('click', (event) => {
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    container.onclick = (event) => {
+        // 适配手机端的点击位置计算
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(dnaGroup.children);
 
         if (intersects.length > 0) {
             const title = intersects[0].object.userData.title;
-            enterMuseum();  // 进入博物馆
-            switchTab('solo'); // 切换到详情页
-            loadSoloMovie(title); // 加载该电影
+            enterMuseum();  
+            switchTab('solo'); 
+            loadSoloMovie(title); 
         }
-    });
+    };
 
-    // 窗口自适应
+    // --- 5. 窗口缩放适配 ---
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();

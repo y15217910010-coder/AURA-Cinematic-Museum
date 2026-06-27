@@ -1539,3 +1539,70 @@ body::after {
     opacity: 0.3;
     transform: rotateX(85deg) scale(0.6);
 }
+
+/* --- 手机端适配补丁 (屏幕宽度小于 768px 时生效) --- */
+@media (max-width: 768px) {
+    /* 1. 导航栏缩减 */
+    .museum-nav {
+        flex-direction: column;
+        padding: 10px;
+    }
+    .nav-links span {
+        margin-left: 10px;
+        font-size: 9px; /* 缩小文字 */
+    }
+
+    /* 2. 首页 (Landing) 调整 */
+    .main-title {
+        font-size: 40px !important; /* 标题变小，防止折行过乱 */
+    }
+    .hero-content {
+        padding: 0 20px;
+    }
+
+    /* 3. Solo 展厅：核心修改 */
+    .solo-layout {
+        flex-direction: column !important; /* 侧边栏和主展区变成上下排列 */
+        height: auto;
+        overflow-y: auto;
+    }
+    .solo-sidebar {
+        width: 100% !important;
+        height: auto !important;
+        flex: none !important;
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .solo-main {
+        width: 100% !important;
+        padding: 20px !important;
+    }
+    .exhibit-header {
+        flex-direction: column; /* 海报和标题上下放 */
+        align-items: center;
+        text-align: center;
+    }
+    .exhibit-body {
+        grid-template-columns: 1fr !important; /* 描述和图表上下放 */
+        gap: 30px !important;
+    }
+    .chart-column {
+        border-left: none !important;
+        padding-left: 0 !important;
+    }
+
+    /* 4. DNA 螺旋球调整 */
+    /* 在手机上，我们要把螺旋球的直径调小，否则会出屏 */
+    /* 这部分需要在 main.js 里根据窗口宽度动态调整，稍后说 */
+
+    /* 5. 影史纪念柱 (Monoliths) */
+    .monoliths-container {
+        flex-direction: column; /* 柱子变上下堆叠 */
+        align-items: center;
+        height: auto;
+        gap: 80px;
+    }
+    .monolith {
+        transform: rotateX(0) rotateY(0) !important; /* 手机上取消侧视，正对着看更清晰 */
+    }
+}
