@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA | Digital Cinematic Museum</title>
+    <!-- 1. 外部依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+<!-- 全局背景模糊层 -->
+<div id="global-backdrop"></div>
+
+<!-- [A] 馆长的仪式：问卷遮罩层 -->
+<div id="survey-overlay" class="survey-modal">
+    <div class="survey-content">
+        <button class="close-survey" onclick="closeSurvey()">✕</button>
+        
+        <!-- 阶段 1: 问卷 -->
+        <div id="question-view">
+            <h4 class="ritual-step">THE RITUAL / 情感采样</h4>
+            <div id="q-text" class="question-text">正在初始化...</div>
+            <div class="answer-options" id="answer-options"></div>
+            <div class="progress-bar-wrap"><div id="survey-progress" class="progress-bar"></div></div>
+        </div>
+
+        <!-- 阶段 2: 分析页 -->
+        <div id="analysis-view" style="display:none;">
+            <h4 class="ritual-step">ANALYSIS / 灵魂解析</h4>
+            <div id="mood-aura" class="mood-aura-ring"></div>
+            <h2 id="user-title" style="font-family:'Playfair Display'; font-size:32px; margin-top:30px;">读取中...</h2>
+            <p id="user-desc" style="color:#666; line-height:1.8; margin:20px 0; font-size:14px;"></p>
+            <button class="cta-btn" onclick="showFinalResult()">查看推荐电影</button>
+        </div>
+
+        <!-- 阶段 3: 结果 -->
+        <div id="result-view" style="display:none;">
+            <h4 class="ritual-step">DESTINY / 最终答案</h4>
+            <h2 id="rec-movie-title" style="font-family:'Playfair Display'; font-size:42px; margin:20px 0;"></h2>
+            <p id="rec-reason" style="color:#888; font-style:italic; margin-bottom:30px;"></p>
+            <button class="cta-btn" onclick="goToRecommended()">进入电影展位</button>
+        </div>
+    </div>
+</div>
+
+<!-- 浮动仪式入口 -->
+<div id="ritual-entrance" class="ritual-btn" onclick="openSurvey()">
+    <span>✧ 求取电影灵感</span>
+</div>
+
+<!-- [B] 页面 1: 艺术馆落地页 (Landing Page) -->
+<div id="landing-container">
+    <header class="hero">
+        <nav class="nav-minimal">
+            <span class="logo-text">AURA.</span>
+            <button class="enter-btn-elegant" onclick="enterMuseum()">Enter Archive</button>
+        </nav>
+        
+        <div class="hero-content">
+            <h1 class="main-title">The Soul of <br><span class="italic-red">Cinema</span></h1>
+            <p class="manifesto">
+                Decoding the emotional DNA of 1,500 films through deep learning. <br>
+                Discover the frequencies behind the stories you love.
+            </p>
+            <button class="cta-btn" onclick="enterMuseum()">Start Exploring</button>
+        </div>
+        <div id="three-canvas-container"></div> 
+    
+        <nav class="nav-minimal">...</nav>
+        <div class="hero-content">...</div>
+    </header>
+
+    <section class="narrative-sections">
+        <div class="feature-item">
+            <div class="feature-image">
+                <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=1000" alt="Analysis">
+            </div>
+            <div class="feature-text">
+                <h3 class="label-heading">THE ANALYTICS</h3>
+                <h2>Visualized <br>Emotions</h2>
+                <p>我们捕捉了 1500 段灵魂的起伏，将不可见的唏嘘与狂喜化为可触碰的图谱。解析每一帧画面背后跳动的情绪频率。</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="landing-footer">
+        <p>© 2024 AURA CINEMATIC MUSEUM</p>
+    </footer>
+</div>
+
+<!-- [C] 页面 2: 博物馆核心区 -->
+<div id="museum-container" style="display:none;">
+    <nav class="museum-nav">
+        <div class="logo-text" onclick="location.reload()">AURA.</div>
+        <div class="nav-links">
+            <span onclick="switchTab('solo')" class="active" id="tab-solo-btn">Solo Exhibition</span>
+            <span onclick="switchTab('cosmos')" id="tab-cosmos-btn">The Matrix</span>
+            <span onclick="switchTab('gallery')" id="tab-gallery-btn">The Gallery</span>
+            <span onclick="switchTab('archive')" id="tab-archive-btn">Global Archive</span>
+        </div>
+    </nav>
+
+    <!-- 展厅 1: 特展厅 (Solo Exhibition) -->
+<main id="view-solo" class="tab-pane active" style="display: flex;">
+    <div class="solo-layout">
+        <!-- 左侧侧边栏 -->
+        <aside class="solo-sidebar">
+            <div class="filter-header"><h3 class="label-heading">FILTER ARCHIVE</h3></div>
+            <div class="filter-controls" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px;">
+                <input type="text" class="search-bar" id="searchInput" placeholder="Search by title..." oninput="triggerFilter()" style="width: 100%; border: none; border-bottom: 1px solid #ddd; padding: 8px 0; background: transparent; outline: none;">
+                
+                <div class="filter-group">
+                    <label style="font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase;">Genre</label>
+                    <select id="genreFilter" onchange="triggerFilter()" style="width: 100%; padding: 5px; border: 1px solid #eee; background: transparent;"></select>
+                </div>
+                
+                <div class="filter-group">
+                    <label style="font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase;">Year</label>
+                    <select id="yearFilter" onchange="triggerFilter()" style="width: 100%; padding: 5px; border: 1px solid #eee; background: transparent;">
+                        <option value="All">All Years</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label style="font-size: 9px; color: #888; letter-spacing: 1px; text-transform: uppercase;">Min Rating: <span id="ratingVal">0</span></label>
+                    <input type="range" id="ratingFilter" min="0" max="100" value="0" step="5" oninput="updateRatingLabel(this.value)" onchange="triggerFilter()" style="width: 100%;">
+                </div>
+            </div>
+            
+            <h3 class="label-heading">COLLECTION</h3>
+            <div id="movieList"></div>
+        </aside>
+
+        <!-- 右侧核心展示区 (之前被误删的部分) -->
+        <article class="solo-main">
+            <div class="exhibit-header">
+                <div class="poster-box"><img id="solo-poster" src=""></div>
+                <div class="header-text">
+                    <h1 id="displayTitle">SELECT A FILM</h1>
+                    <p id="displayTagline" class="tagline" style="font-style: italic; color: #c0392b; margin: 15px 0;"></p>
+                    <div id="displaySubtitle" class="meta-info" style="font-size: 11px; letter-spacing: 2px; color: #888;"></div>
+                </div>
+            </div>
+            
+            <div class="exhibit-body" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 60px;">
+                <div class="description-column">
+                    <h4 class="label-heading">PLOT SUMMARY</h4>
+                    <p id="displayOverview" style="line-height: 1.8; color: #555; text-align: justify;"></p>
+                    
+                    <div class="similar-section" style="margin-top: 40px;">
+                        <h4 class="label-heading">SIMILAR SOULS</h4>
+                        <div id="similar-movies-container" style="display: flex; gap: 15px; margin-top: 15px;"></div>
+                    </div>
+                </div>
+                
+                <div class="chart-column">
+                    <h4 class="label-heading">EMOTIONAL SPECTRUM</h4>
+                    <div id="radar-art" style="width: 100%; height: 450px;"></div>
+                </div>
+            </div>
+        </article>
+    </div>
+</main>
+
+    <!-- 展厅 2: 宇宙展厅 (唯一容器，不可重复) -->
+    <main id="view-cosmos" class="tab-pane">
+        <div id="cosmos-master-chart" style="width: 100%; height: 7500px;"></div>
+    </main>
+
+    <!-- 展厅 3: 画廊厅 -->
+    <main id="view-gallery" class="tab-pane">
+        <div id="galleryContent" style="padding: 40px 5%;"></div>
+    </main>
+
+    <!-- 展厅 4: 全球档案馆 -->
+    <!-- index.html 档案馆部分 -->
+<!-- [C] 展厅 4: 全球档案馆 (完整艺术重构版) -->
+<!-- [C] 展厅 4: 全球档案馆 (极简实物版) -->
+<main id="view-archive" class="tab-pane">
+    
+    <!-- 01. 顶部：图表区标题 -->
+    <div class="archive-section-header">
+        <span class="section-tag">ARCHIVE 01</span>
+        <h2 class="art-title">The Emotional <span class="italic-red">Spectrogram</span></h2>
+        <div class="section-underline"></div>
+        <p class="section-intro">解析影史1500部杰作的情绪频率。点击连线进入该电影的深层灵魂展厅。</p>
+        <button class="reset-btn" onclick="resetArchiveFilters()">↺ RE-CALIBRATE</button>
+    </div>
+
+    <!-- 02. 中间：全球折线图 -->
+    <div id="global-map" style="width: 100%; height: 55vh; margin-bottom: 80px;"></div>
+
+    <!-- 03. 纪念柱区 -->
+    <div class="history-section">
+        <!-- 纪念柱区标题 -->
+        <div class="archive-section-header centered">
+            <span class="section-tag">ARCHIVE 02</span>
+            <h2 class="art-title">The Architects of <span class="italic-red">Time</span></h2>
+            <div class="section-underline"></div>
+            <p class="section-intro">五个时代的演变，构筑了现代电影的叙事基石。</p>
+        </div>
+
+        <div class="monoliths-container">
+            <!-- 柱体 01: SILENT ERA -->
+            <div class="monolith-wrapper">
+                <div class="monolith" style="--h: 220px; --color: #e8e6da;">
+                    <div class="m-face m-front">
+                        <div class="m-content">
+                            <span class="m-id">01</span>
+                            <h4 class="m-title">SILENT ERA</h4>
+                            <span class="m-year">1895—1929</span>
+                            <p class="m-desc">光影的黎明。在没有对白的年代，卓别林用肢体定义了最初的情感震颤。</p>
+                        </div>
+                    </div>
+                    <div class="m-face m-right"></div>
+                    <div class="m-face m-top"></div>
+                </div>
+                <div class="m-shadow"></div>
+            </div>
+
+            <!-- 柱体 02: GOLDEN AGE -->
+            <div class="monolith-wrapper">
+                <div class="monolith" style="--h: 300px; --color: #dfdbca;">
+                    <div class="m-face m-front">
+                        <div class="m-content">
+                            <span class="m-id">02</span>
+                            <h4 class="m-title">GOLDEN AGE</h4>
+                            <span class="m-year">1930—1950</span>
+                            <p class="m-desc">制片厂制的巅峰。宏大叙事与古典构图，构筑了人类对电影最纯粹的幻想。</p>
+                        </div>
+                    </div>
+                    <div class="m-face m-right"></div>
+                    <div class="m-face m-top"></div>
+                </div>
+                <div class="m-shadow"></div>
+            </div>
+
+            <!-- 柱体 03: NEW WAVE -->
+            <div class="monolith-wrapper">
+                <div class="monolith" style="--h: 260px; --color: #d8d4bf;">
+                    <div class="m-face m-front">
+                        <div class="m-content">
+                            <span class="m-id">03</span>
+                            <h4 class="m-title">NEW WAVE</h4>
+                            <span class="m-year">1950—1970</span>
+                            <p class="m-desc">反叛与自由。电影开始打破规则，走向作者表达与实验主义的深刻领域。</p>
+                        </div>
+                    </div>
+                    <div class="m-face m-right"></div>
+                    <div class="m-face m-top"></div>
+                </div>
+                <div class="m-shadow"></div>
+            </div>
+
+            <!-- 柱体 04: BLOCKBUSTER -->
+            <div class="monolith-wrapper">
+                <div class="monolith" style="--h: 360px; --color: #d1ccb3;">
+                    <div class="m-face m-front">
+                        <div class="m-content">
+                            <span class="m-id">04</span>
+                            <h4 class="m-title">BLOCKBUSTER</h4>
+                            <span class="m-year">1970—2000</span>
+                            <p class="m-desc">工业化的奇观。视觉特效革命让电影成为全球性的共鸣与跨越国界的商业神话。</p>
+                        </div>
+                    </div>
+                    <div class="m-face m-right"></div>
+                    <div class="m-face m-top"></div>
+                </div>
+                <div class="m-shadow"></div>
+            </div>
+
+            <!-- 柱体 05: DIGITAL ERA -->
+            <div class="monolith-wrapper">
+                <div class="monolith" style="--h: 240px; --color: #c9c4a8;">
+                    <div class="m-face m-front">
+                        <div class="m-content">
+                            <span class="m-id">05</span>
+                            <h4 class="m-title">DIGITAL ERA</h4>
+                            <span class="m-year">2000—PRESENT</span>
+                            <p class="m-desc">流媒体与AI。在数据洪流中，我们试图用技术重新捕捉那颗最原始的人心跳动。</p>
+                        </div>
+                    </div>
+                    <div class="m-face m-right"></div>
+                    <div class="m-face m-top"></div>
+                </div>
+                <div class="m-shadow"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/static/main.js"></script>
+</body>
+</html>
+
+<!-- index.html 档案馆底部 -->
+<!-- index.html 档案馆底部 - 精密密封版 -->
+<div class="history-section">
+    <div class="section-divider"></div>
+    <h3 class="label-heading-center">CHRONICLES OF MOTION</h3>
+    
+    <div class="monoliths-container">
+        <!-- 每一个 monolith 都是一个精密计算的立方体 -->
+        <div class="monolith-wrapper">
+            <div class="monolith" style="--h: 220px; --color: #e8e6da; --glow: #f1c40f;">
+                <div class="m-face m-front">
+                    <div class="m-content">
+                        <span class="m-id">01</span>
+                        <h4 class="m-title">SILENT ERA</h4>
+                        <span class="m-year">1895—1929</span>
+                        <p class="m-desc">光影的黎明。卓别林用肢体语言定义了最初的情感震颤。</p>
+                    </div>
+                </div>
+                <div class="m-face m-right"></div>
+                <div class="m-face m-top"></div> <!-- 纯净封顶 -->
+                <div class="m-aura"></div> <!-- 外部溢出的光束 -->
+            </div>
+            <div class="m-shadow"></div>
+        </div>
+
+        <div class="monolith-wrapper">
+            <div class="monolith" style="--h: 300px; --color: #dfdbca; --glow: #e67e22;">
+                <div class="m-face m-front">
+                    <div class="m-content">
+                        <span class="m-id">02</span>
+                        <h4 class="m-title">GOLDEN AGE</h4>
+                        <span class="m-year">1930—1950</span>
+                        <p class="m-desc">好莱坞巅峰。宏大叙事与古典构图，构筑了对电影最纯粹的幻想。</p>
+                    </div>
+                </div>
+                <div class="m-face m-right"></div>
+                <div class="m-face m-top"></div>
+                <div class="m-aura"></div>
+            </div>
+            <div class="m-shadow"></div>
+        </div>
+
+        <div class="monolith-wrapper">
+            <div class="monolith" style="--h: 260px; --color: #d8d4bf; --glow: #3498db;">
+                <div class="m-face m-front">
+                    <div class="m-content">
+                        <span class="m-id">03</span>
+                        <h4 class="m-title">NEW WAVE</h4>
+                        <span class="m-year">1950—1970</span>
+                        <p class="m-desc">反叛与自由。电影开始打破规则，走向作者表达的深刻领域。</p>
+                    </div>
+                </div>
+                <div class="m-face m-right"></div>
+                <div class="m-face m-top"></div>
+                <div class="m-aura"></div>
+            </div>
+            <div class="m-shadow"></div>
+        </div>
+
+        <div class="monolith-wrapper">
+            <div class="monolith" style="--h: 360px; --color: #d1ccb3; --glow: #e74c3c;">
+                <div class="m-face m-front">
+                    <div class="m-content">
+                        <span class="m-id">04</span>
+                        <h4 class="m-title">BLOCKBUSTER</h4>
+                        <span class="m-year">1970—2000</span>
+                        <p class="m-desc">工业化奇观。视觉特效革命让电影成为全球性的共鸣。</p>
+                    </div>
+                </div>
+                <div class="m-face m-right"></div>
+                <div class="m-face m-top"></div>
+                <div class="m-aura"></div>
+            </div>
+            <div class="m-shadow"></div>
+        </div>
+
+        <div class="monolith-wrapper">
+            <div class="monolith" style="--h: 240px; --color: #c9c4a8; --glow: #2ecc71;">
+                <div class="m-face m-front">
+                    <div class="m-content">
+                        <span class="m-id">05</span>
+                        <h4 class="m-title">DIGITAL ERA</h4>
+                        <span class="m-year">2000—NOW</span>
+                        <p class="m-desc">流媒体与AI。在数据洪流中，重新捕捉最原始的人心跳动。</p>
+                    </div>
+                </div>
+                <div class="m-face m-right"></div>
+                <div class="m-face m-top"></div>
+                <div class="m-aura"></div>
+            </div>
+            <div class="m-shadow"></div>
+        </div>
+    </div>
+</div>

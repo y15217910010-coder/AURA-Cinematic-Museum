@@ -1,0 +1,1541 @@
+/* 引入顶级艺术字体 */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@200;400;600&display=swap');
+
+:root {
+    --bg-paper: #f9f8f2;   /* 羊皮纸/艺术纸色 */
+    --text-deep: #1a1a1a;  /* 深炭黑 */
+    --accent-red: #c0392b; /* 博物馆红 */
+    --ui-grey: #888888;
+}
+
+html, body {
+    margin: 0; padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* 核心：禁止最外层 body 产生任何滚动条 */
+}
+
+/* --- AURA 2.0: Letterboxd 沉浸式风格 --- */
+
+:root {
+    --bg-dark: #14181c;    /* Letterboxd 标志性的深色背景 */
+    --text-white: #ffffff;
+    --accent-green: #00e054; /* Letterboxd 的绿色按钮感，或保持你的红 */
+    --accent-red: #e02424;
+    --text-dim: #99aabb;
+}
+
+
+/* --- 落地页：全屏电影背板 --- */
+/* --- 1. 全局艺术底色 (回归羊皮纸色) --- */
+:root {
+    --bg-paper: #fdfcf0;   /* 更清爽的艺术纸色 */
+    --text-deep: #1a1a1a;
+    --accent-red: #c0392b;
+    --ui-grey: #888888;
+}
+
+body, html {
+    margin: 0; padding: 0;
+    width: 100%;
+    /* 核心修改：恢复 body 的滚动能力，否则落地页滑不动 */
+    min-height: 100%;
+    overflow-x: hidden; 
+    overflow-y: auto; 
+    background-color: var(--bg-paper);
+}
+
+#landing-container {
+    width: 100%;
+    display: block;
+}
+
+/* --- 2. Hero Section: 借鉴 Letterboxd 布局 --- */
+.hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 居中布局 */
+    justify-content: center;
+    padding: 0 10%;
+    text-align: center;
+    background: 
+        linear-gradient(rgba(253, 252, 240, 0.8), rgba(253, 252, 240, 0.95)),
+        url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&q=80&w=2000');
+    background-size: cover;
+}
+
+.main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(60px, 8vw, 100px);
+    line-height: 0.9;
+    margin-bottom: 30px;
+    font-weight: 700;
+    letter-spacing: -2px;
+}
+
+.italic-red {
+    font-style: italic;
+    color: var(--accent-red);
+}
+
+.manifesto {
+    font-size: 18px;
+    max-width: 600px;
+    line-height: 1.6;
+    color: var(--ui-grey);
+    margin: 0 auto 40px auto;
+}
+
+.cta-btn {
+    background: var(--text-deep);
+    color: white;
+    border: none;
+    padding: 18px 40px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.cta-btn:hover { background: var(--accent-red); transform: scale(1.05); }
+
+/* --- 3. 交错叙事区：增加呼吸感 --- */
+.narrative-sections {
+    padding: 150px 10%;
+    background-color: var(--bg-paper);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10%; /* 巨大的间距 */
+    margin-bottom: 200px;
+}
+
+.feature-item.reverse {
+    flex-direction: row-reverse;
+}
+
+.feature-image {
+    flex: 1.2;
+}
+
+.feature-image img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 2px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.08); /* 极淡的艺术阴影 */
+}
+
+.feature-text {
+    flex: 1;
+}
+
+.feature-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    line-height: 1.1;
+    margin: 20px 0;
+}
+
+.feature-text p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #555;
+    font-weight: 300;
+}
+
+.label-heading {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent-red);
+    font-weight: 600;
+}
+
+/* 底部页脚 */
+.landing-footer {
+    padding: 60px;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #ccc;
+}
+
+
+/* 全局大图背景模糊 */
+#global-backdrop {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -2;
+    filter: blur(80px) brightness(0.9);
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 2s;
+}
+
+/* --- 博物馆核心导航 (Museum Navigation) --- */
+.museum-nav {
+    padding: 20px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(249, 248, 242, 0.9); /* 半透明纸质感 */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-links span {
+    margin-left: 35px;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--ui-grey);
+    transition: 0.3s;
+}
+
+.nav-links span.active {
+    color: var(--text-deep);
+    font-weight: 600;
+    border-bottom: 1px solid var(--accent-red);
+}
+
+/* --- 特展厅布局 (Solo Exhibition Layout) --- */
+/* 强制消除博物馆模式下的 body 溢出 */
+#museum-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column; /* 导航栏在上，展厅在下 */
+    overflow: hidden;
+}
+
+/* Solo 特展厅：强制左对齐 */
+.solo-layout {
+    display: flex !important;
+    width: 100% !important;
+    height: calc(100vh - 80px); /* 扣掉导航栏高度 */
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+/* 左侧边栏：精准固定 280px */
+.solo-sidebar {
+    width: 280px !important;
+    flex: 0 0 280px !important; /* 不压缩，不扩张 */
+    height: 100%;
+    background: rgba(0,0,0,0.02);
+    border-right: 1px solid rgba(0,0,0,0.05);
+    padding: 20px;
+    overflow-y: auto; /* 允许内部滚动 */
+    box-sizing: border-box;
+}
+
+/* 右侧主展区：占满剩余空间，不产生横向偏移 */
+.solo-main {
+    flex: 1 !important;
+    height: 100%;
+    overflow-y: auto !important; /* 这里是唯一的上下滚动条 */
+    padding: 40px 6% 100px 6% !important; /* 底部增加 100px 留白 */
+    box-sizing: border-box;
+}
+
+/* 左侧边栏：索引与搜索 */
+.solo-sidebar {
+    width: 280px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.search-bar {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 25px;
+}
+
+#movieList {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 13px;
+    color: var(--ui-grey);
+}
+
+/* 滚动条美化 */
+#movieList::-webkit-scrollbar { width: 3px; }
+#movieList::-webkit-scrollbar-thumb { background: #eee; }
+
+.movie-item {
+    padding: 12px 0;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0,0,0,0.02);
+    transition: 0.3s;
+}
+
+.movie-item:hover {
+    color: var(--accent-red);
+    padding-left: 5px;
+}
+
+/* 右侧核心展示区 */
+.solo-main {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto !important; /* 只有这里产生内部滚动条 */
+    padding: 40px 6% 100px 6% !important; /* 增加底部内边距，防止被遮挡 */
+}
+
+.exhibit-header {
+    display: flex;
+    align-items: flex-start; /* 顶部对齐，防止互相挤压 */
+    gap: 40px;               /* 适中的间距 */
+    margin-bottom: 60px;
+    position: relative;
+}
+
+.poster-box {
+    width: 200px !important; /* 缩小海报：从 280 降到 200 */
+    flex-shrink: 0;
+    z-index: 5;
+    /* 去掉旋转，改为极致的阴影质感 */
+    transform: none !important; 
+}
+.poster-box:hover { transform: rotate(0deg) scale(1.02); }
+
+.poster-box img {
+    width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.header-text {
+    flex: 1;
+    padding-top: 10px; /* 让标题稍微往下一点，更有设计感 */
+}
+
+.header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px !important; /* 调整标题大小：平衡感 */
+    margin: 0;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text-deep);
+    letter-spacing: -1px;
+}
+
+.tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px !important; /* 缩小标语 */
+    color: var(--accent-red);
+    margin: 15px 0 !important;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.4;
+    max-width: 600px;
+}
+
+.meta-info {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--ui-grey);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* --- 2. 描述与图表区域：增加留白 --- */
+/* --- 1. 核心容器：调整比例为 1.4 : 1 --- */
+.exhibit-body {
+    display: grid !important;
+    grid-template-columns: 1.4fr 1fr !important;
+    gap: 60px !important;
+    /* 关键：拉伸对齐，确保右侧列和左侧列一样高，这样右侧才有“空间”可以沉底 */
+    align-items: stretch !important; 
+    margin-top: 20px;
+    min-height: 500px; /* 给一个最小高度，防止简介太短时布局塌陷 */
+}
+
+/* --- 2. 左侧文字区：实现“右边完全空出来” --- */
+.description-column {
+    /* 强制限制宽度，并增加巨大的右内边距 */
+    max-width: 520px; 
+    padding-right: 100px; 
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- 3. 右侧图表区：增加“艺术展位”感 --- */
+.chart-column {
+    display: flex !important;
+    flex-direction: column !important;
+    /* 核心修改：让雷达图在右侧垂直居中对齐，或者根据你之前的喜好设为底部对齐 */
+    justify-content: flex-end !important; 
+    align-items: center !important;
+    border-left: 1px solid rgba(0, 0, 0, 0.05) !important;
+    padding-left: 50px !important;
+    min-height: 400px; /* 给一个保底高度 */
+}
+
+/* 移除之前可能存在的 ::before 伪元素，防止它干扰 */
+.chart-column::before {
+    display: none !important;
+}
+
+#displayOverview {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #555;
+    font-weight: 300;
+    text-align: justify;
+    margin-bottom: 80px; /* 与下方海报拉开距离 */
+}
+
+/* --- 相似推荐区：做成精致的水平陈列架 --- */
+.similar-section {
+    margin-top: 50px;
+    padding-bottom: 30px; /* 底部增加留白 */
+    overflow: visible !important; /* 允许名字显示出来 */
+}
+
+#similar-movies-container {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 20px;
+}
+
+.similar-card {
+    flex: 0 0 110px; /* 稍微调宽一点 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: visible !important; /* 核心：防止名字被切 */
+}
+
+/* 修复电影名文字 */
+.similar-card div {
+    font-size: 10px !important;
+    margin-top: 10px !important;
+    line-height: 1.2 !important;
+    color: #888;
+    text-align: center;
+    width: 100%;
+    word-wrap: break-word; /* 允许换行 */
+    white-space: normal !important; /* 允许换行而非一行到底 */
+}
+
+
+.similar-card img {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.similar-card:hover {
+    transform: translateY(-8px);
+}
+
+.similar-card:hover img {
+    filter: grayscale(0);
+    box-shadow: 0 12px 30px rgba(192, 57, 43, 0.2);
+}
+
+.similar-card .title-small {
+    font-size: 9px;
+    color: #888;
+    margin-top: 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.label-heading-chart {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #ccc;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+/* 雷达图容器 */
+#radar-art {
+    width: 100% !important;
+    height: 450px !important; /* 恢复较大的尺寸，让它更有张力 */
+}
+
+/* --- 画廊与档案室视图切换 (Tab Switching) --- */
+.tab-pane {
+    display: none;
+    width: 100%;
+    height: calc(100vh - 80px); /* 减去导航栏高度 */
+    overflow-y: auto !important; /* 允许纵向滚动 */
+    padding-bottom: 200px !important; /* 核心：增加 200px 的底部留白，确保能滑到底 */
+    box-sizing: border-box;
+}
+.tab-pane.active {
+    display: block !important;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.reset-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #888;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 20px;
+}
+
+.reset-btn:hover {
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+    background: rgba(192, 57, 43, 0.05);
+}
+
+
+/* --- 画廊厅 (Gallery View) 布局补丁 --- */
+
+.gallery-hall {
+    margin-bottom: 80px;
+}
+
+.hall-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 10px;
+}
+
+.poster-grid {
+    display: grid;
+    /* 响应式网格：每行自动填充，最小宽度 160px */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 30px;
+}
+
+.gallery-card {
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.gallery-card:hover {
+    transform: translateY(-10px);
+}
+
+.gallery-card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 2px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.card-label {
+    font-size: 11px;
+    text-align: center;
+    margin-top: 12px;
+    letter-spacing: 1px;
+    color: var(--text-deep);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+#galleryContent {
+    width: 100% !important;
+    min-height: 500px;
+    display: block !important;
+}
+
+
+.filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--ui-grey);
+    font-weight: 600;
+}
+
+.filter-group select {
+    background: transparent;
+    border: 1px solid #eee;
+    padding: 8px;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    cursor: pointer;
+}
+
+/* 进度条样式微调 */
+#ratingFilter {
+    -webkit-appearance: none;
+    height: 2px;
+    background: #eee;
+    outline: none;
+}
+
+#ratingFilter::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-red);
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* --- 画廊横向滑动 (Carousel) 核心样式 --- */
+
+/* 1. 视口容器：隐藏溢出的内容 */
+.carousel-container {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* 轨道宽度锁定，禁止撑开父元素 */
+.carousel-track {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 20px 5px;
+    /* 隐藏滚动条但保留功能 */
+    scrollbar-width: none; 
+}
+.carousel-track::-webkit-scrollbar { display: none; }
+
+/* 3. 导航箭头按钮 */
+./* --- 按钮：钉在展厅的两侧 --- */
+.carousel-btn {
+    position: absolute;
+    /* 关键点：top 50% 配合 translateY(-50%) 实现完美垂直居中 */
+    top: 50%;
+    transform: translateY(-50%); 
+    
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 100; /* 确保在海报上方 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: serif;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/* 按钮各自固定在左右边沿 */
+.carousel-btn.prev {
+    left: 0;
+}
+
+.carousel-btn.next {
+    right: 0;
+}
+
+.carousel-btn:hover {
+    background: var(--accent-red);
+    color: white;
+    border-color: var(--accent-red);
+    transform: translateY(-50%) scale(1.1); /* 悬浮时放大，但不影响垂直位置 */
+}
+
+/* 4. 画廊海报卡片微调 */
+.gallery-card {
+    flex: 0 0 180px; /* 固定宽度 */
+    cursor: pointer;
+}
+
+.gallery-card img {
+    width: 100%;
+    height: 270px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* 悬浮效果：轻微放大并增加阴影 */
+.gallery-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    z-index: 2;
+}
+
+.gallery-card:hover img {
+    box-shadow: 0 15px 35px rgba(192, 57, 43, 0.2);
+}
+
+/* 确保画廊展厅容器不溢出 */
+#view-gallery {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden; /* 禁止横向滚动条 */
+    padding: 0;
+    margin: 0;
+}
+
+#galleryContent {
+    width: 90% !important; /* 占据屏幕 90% 宽度 */
+    max-width: 1400px;      /* 在超大屏上限制最大宽度 */
+    margin: 0 auto;         /* 强制居中 */
+    padding-top: 40px;
+    padding-bottom: 200px;
+}
+
+.gallery-hall {
+    width: 100%;
+    margin-bottom: 60px;
+}
+
+/* --- 馆长的仪式：问卷遮罩层 --- */
+.survey-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(249, 248, 242, 0.8); /* 纸张白半透明 */
+    backdrop-filter: blur(20px); /* 毛玻璃，非常高级 */
+    z-index: 2000;
+    display: none; /* 初始隐藏 */
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    align-items: center;
+    justify-content: center;
+}
+
+.survey-content {
+    background: white;
+    width: 600px;
+    padding: 60px;
+    border-radius: 2px;
+    box-shadow: 0 30px 100px rgba(0,0,0,0.1);
+    text-align: center;
+    position: relative;
+}
+
+.ritual-step {
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--accent-red);
+    margin-bottom: 30px;
+}
+
+.question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    margin-bottom: 40px;
+    line-height: 1.4;
+}
+
+.answer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.opt-btn {
+    background: none;
+    border: 1px solid #eee;
+    padding: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+    color: #666;
+}
+
+.opt-btn:hover {
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+    background: rgba(192, 57, 43, 0.02);
+}
+
+/* 进度条 */
+.progress-bar-wrap {
+    width: 100%;
+    height: 2px;
+    background: #eee;
+    margin-top: 40px;
+}
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--accent-red);
+    transition: width 0.4s;
+}
+
+/* 入口按钮 */
+.ritual-btn {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    background: var(--text-deep);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: 2px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: 0.3s;
+    z-index: 1000;
+}
+.ritual-btn:hover {
+    transform: scale(1.05) rotate(-3deg);
+    background: var(--accent-red);
+}
+
+.close-survey {
+    position: absolute; top: 20px; right: 20px;
+    background: none; border: none; font-size: 20px; cursor: pointer; color: #ccc;
+}
+
+/* 中间报告页特有样式 */
+#analysis-view {
+    animation: fadeIn 1s ease;
+    text-align: center;
+}
+
+/* 动态光环效果 */
+.mood-aura-ring {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    border-radius: 50%;
+    /* 默认光环颜色 */
+    background: white;
+    box-shadow: 0 0 50px rgba(192, 57, 43, 0.2); 
+    transition: all 1.5s ease;
+    position: relative;
+}
+
+/* 呼吸动画 */
+@keyframes auraPulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 0.5; }
+}
+
+.mood-aura-ring {
+    animation: auraPulse 3s infinite ease-in-out;
+}
+
+/* 不同称号的颜色类 (JS动态添加) */
+.aura-joy { box-shadow: 0 0 60px rgba(241, 196, 15, 0.6); background: rgba(241, 196, 15, 0.1); }
+.aura-sadness { box-shadow: 0 0 60px rgba(52, 152, 219, 0.6); background: rgba(52, 152, 219, 0.1); }
+.aura-fear { box-shadow: 0 0 60px rgba(155, 89, 182, 0.6); background: rgba(155, 89, 182, 0.1); }
+.aura-anger { box-shadow: 0 0 60px rgba(231, 76, 60, 0.6); background: rgba(231, 76, 60, 0.1); }
+.aura-surprise { box-shadow: 0 0 60px rgba(26, 188, 156, 0.6); background: rgba(26, 188, 156, 0.1); }
+
+/* 按钮微调 */
+.cta-btn {
+    background: var(--text-deep);
+    color: white;
+    border: none;
+    padding: 15px 35px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.cta-btn:hover { background: var(--accent-red); transform: translateY(-2px); }
+
+/* 强制执行双栏布局 */
+.exhibit-body {
+    display: grid !important;
+    grid-template-columns: 1.2fr 1fr !important; /* 强制左右 6:4 */
+    gap: 80px !important;
+    width: 100% !important;
+    align-items: start !important;
+}
+
+/* 强制相似推荐横向排布 */
+#similar-movies-container {
+    display: flex !important;
+    flex-direction: row !important; /* 强制横向 */
+    justify-content: flex-start !important;
+    gap: 20px !important;
+    margin-top: 20px !important;
+}
+
+/* 强制雷达图大小 */
+#radar-art {
+    width: 100% !important;
+    height: 500px !important;
+    min-width: 400px !important;
+}
+
+/* 响应式降级：如果屏幕太窄（比如手机），再变回上下排列 */
+@media (max-width: 1000px) {
+    .exhibit-body {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* --- 最后的细节：垂直分界线 --- */
+.chart-column {
+    /* 在雷达图左侧增加一条极淡的灰线 */
+    border-left: 1px solid rgba(0, 0, 0, 0.05) !important; 
+    
+    /* 增加左侧内边距，让线条处于两栏的正中间 */
+    padding-left: 50px !important;
+    
+    /* 确保线条的高度能从底部向上延伸 */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+}
+
+/* 调整左侧区域的间距，让两条线（横线和竖线）视觉上更和谐 */
+.description-column {
+    padding-right: 50px !important;
+}
+
+/* --- 策展人点评区艺术化排版 --- */
+.curator-insight-block {
+    max-width: 700px;
+    margin: 20px auto 40px auto;
+    text-align: center;
+    min-height: 80px; /* 固定高度防止文字切换时页面跳动 */
+}
+
+#insight-text {
+    font-family: 'Playfair Display', serif; /* 艺术衬线体 */
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #444;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    position: relative;
+    display: inline-block;
+}
+
+/* 给点评加一对精致的引号装饰 */
+#insight-text::before {
+    content: '“';
+    font-size: 30px;
+    color: var(--accent-red);
+    position: absolute;
+    left: -30px;
+    top: -10px;
+    opacity: 0.3;
+}
+
+#insight-text::after {
+    content: '”';
+    font-size: 30px;
+    color: var(--accent-red);
+    position: absolute;
+    right: -30px;
+    bottom: -20px;
+    opacity: 0.3;
+}
+
+/* --- 展厅通用布局 (保证图表不压扁) --- */
+.tab-pane {
+    display: none;
+    width: 100%;
+    height: calc(100vh - 80px); /* 减去导航栏高度 */
+    overflow-y: auto !important; /* 允许纵向滚动 */
+    padding-bottom: 200px !important; /* 核心：增加 200px 的底部留白，确保能滑到底 */
+    box-sizing: border-box;
+}
+.tab-pane.active {
+    display: block !important;
+}
+
+
+.archive-container {
+    flex: 1 !important; /* 占据剩余所有宽度 */
+    height: 75vh !important; /* 强制高度 */
+    min-width: 0; /* 允许 flex 子元素收缩，防止撑破 */
+    position: relative;
+    background: rgba(255,255,255,0.3); /* 淡淡的底色方便观察位置 */
+}
+
+#view-archive .exhibit-wrapper {
+    display: block !important;
+    width: 90%;
+    margin: 0 auto;
+    padding-top: 20px;
+    padding-bottom: 50px; /* 增加图表下方的间距 */
+}
+
+/* ECharts 挂载点 */
+#global-map {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* 档案馆标题与工具栏 */
+.archive-header {
+    padding: 30px 10%;
+    text-align: left;
+}
+
+
+/* 强制给图表容器指定高度，否则 ECharts 会渲染成 0px */
+#galleryContent {
+    width: 100% !important;
+    height: 600px !important; /* 强制高度 */
+    min-height: 500px;
+    margin-bottom: 50px;
+}
+
+
+.scroll-hint {
+    margin-top: 50px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent-red);
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+/* 细胞图表的特殊背景 */
+#section-cells {
+    background-color: #fcfcfc;
+}
+
+.exhibit-wrapper {
+    display: flex !important;
+    flex-direction: row;
+    width: 100%;
+    /* 不要在这里写死 height */
+    padding: 0 5%;
+    align-items: flex-start; /* 顶部对齐，防止图表被垂直挤压 */
+}
+
+.exhibit-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    line-height: 1.1;
+    margin: 20px 0;
+}
+
+.exhibit-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 40px;
+}
+
+/* 艺术色盘 */
+.color-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.legend-item {
+    font-size: 11px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    color: #888;
+}
+
+.legend-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* 对应 data_enrich.py 里的颜色 */
+.dot.joy { background: #F1C40F; }
+.dot.sadness { background: #3498DB; }
+.dot.fear { background: #8E44AD; }
+.dot.anger { background: #E74C3C; }
+.dot.amusement { background: #FF69B4; }
+
+
+.floating-insight {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: #444;
+    text-align: center;
+    width: 80%;
+    pointer-events: none;
+}
+
+/* 针对档案馆的平行图，防止它顶到最下面 */
+#global-map {
+    width: 100% !important;
+    height: 65vh !important; /* 稍微调小一点，确保在小屏幕也能显示完整 */
+    min-height: 500px;
+}
+
+/* 确保这段代码前后的括号都是闭合的 */
+/* 宇宙展厅回归纸质风格 */
+#view-cosmos {
+    background-color: var(--bg-paper) !important;
+    overflow-y: auto !important;
+}
+
+#cosmos-master-chart {
+    opacity: 0;
+    animation: fadeInChart 1.5s ease forwards;
+}
+
+@keyframes fadeInChart {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.legend-group { margin-bottom: 15px; }
+.legend-label { 
+    display: block; 
+    font-size: 9px; 
+    color: #888; 
+    letter-spacing: 2px; 
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.legend-dot {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 12px;
+    font-size: 10px;
+    color: #eee;
+}
+
+.dot-sample {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+}
+
+/* --- 完美化视觉抛光补丁 --- */
+
+/* 1. 艺术感极细滚动条 */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-paper); }
+::-webkit-scrollbar-thumb { 
+    background: #e0ddd0; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { background: var(--accent-red); }
+
+/* 2. 侧边栏列表悬浮动画 (加个小箭头) */
+.movie-item {
+    padding: 14px 0;
+    font-size: 13px;
+    color: #888;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.movie-item:hover {
+    color: var(--text-deep);
+    padding-left: 12px;
+    background: rgba(0,0,0,0.01);
+}
+.movie-item::before {
+    content: '→';
+    position: absolute;
+    left: -10px;
+    opacity: 0;
+    transition: 0.3s;
+    color: var(--accent-red);
+}
+.movie-item:hover::before {
+    left: 0;
+    opacity: 1;
+}
+
+/* 3. 纸张纹理底层 (画龙点睛) */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    /* 使用一个淡纹理图，增加物理纸张感 */
+    background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* 4. 详情页排版优化 */
+#displayTitle {
+    letter-spacing: -1px;
+    margin-bottom: 5px;
+}
+#displayOverview {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.01em;
+    color: #444;
+}
+
+/* 兜底：确保展示区初始可见 */
+.solo-main {
+    opacity: 1 !important;
+    transition: opacity 0.4s ease;
+}
+
+#solo-poster {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* style.css */
+#three-canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 1; /* 提升层级 */
+    pointer-events: none; /* 初始设为 none，防止挡住按钮 */
+}
+
+/* 修正 Hero 样式，确保背景透明，露出底部的羊皮纸色 */
+.hero {
+    position: relative;
+    background: none !important; /* 暂时去掉背景图，测试球体 */
+    overflow: hidden;
+}
+
+/* 让 Hero 的文字浮在 3D 球之上，且不干扰鼠标操作 3D 球 */
+.hero-content {
+    position: relative;
+    z-index: 10;
+    pointer-events: none; /* 关键：点击会穿过文字点到后面的球 */
+}
+
+/* 确保按钮依然可以点击 */
+.cta-btn, .nav-minimal, .ritual-btn {
+    pointer-events: auto !important;
+}
+
+/* --- 1. 顶部标本卡片样式 --- */
+.specimen-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 0 10%;
+    margin-bottom: 20px;
+}
+
+.specimen-card {
+    text-align: center;
+    width: 80px;
+    opacity: 0; /* JS 加载后淡入 */
+    transition: opacity 1s ease;
+}
+
+.mini-poster {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-bottom: 8px;
+}
+
+.specimen-label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--accent-red);
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.specimen-title {
+    font-size: 8px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.label-heading-center {
+    text-align: center;
+    letter-spacing: 5px;
+    font-size: 11px;
+    color: #ccc;
+    margin-bottom: 80px;
+}
+
+
+/* 柱体顶面 */
+.m-top {
+    position: absolute;
+    top: 0; left: 0;
+    width: 140px; height: 140px;
+    background: #eee;
+    transform: rotateX(90deg) translateZ(70px); /* 向上移动一半宽度 */
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+}
+
+.m-top img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+}
+
+/* 柱体侧面 (正面) */
+.m-side {
+    padding: 20px;
+    color: #444;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.05));
+    height: 100%;
+    box-sizing: border-box;
+    border-left: 1px solid rgba(255,255,255,0.5);
+}
+
+.m-year { font-size: 10px; color: var(--accent-red); font-weight: bold; }
+.m-title { font-family: 'Playfair Display', serif; margin: 10px 0; font-size: 16px; }
+.m-desc { font-size: 11px; line-height: 1.5; color: #777; }
+
+/* style.css 档案馆增强 */
+/* --- 1. 档案馆通用容器 --- */
+/* --- 1. 档案馆通用容器 --- */
+#view-archive {
+    overflow-y: auto !important;
+    padding-bottom: 200px;
+}
+
+/* --- 2. 艺术标题排版系统 --- */
+.archive-section-header {
+    padding: 80px 10% 40px 10%;
+    text-align: left;
+}
+
+.archive-section-header.centered {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.section-tag {
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: var(--accent-red);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.art-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    color: #1a1a1a;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1;
+}
+
+.section-underline {
+    width: 60px;
+    height: 3px;
+    background: var(--accent-red);
+    margin: 15px 0;
+}
+
+.centered .section-underline {
+    margin: 15px auto;
+}
+
+.section-intro {
+    font-size: 14px;
+    color: #888;
+    max-width: 550px;
+    line-height: 1.8;
+    font-weight: 300;
+}
+
+.centered .section-intro {
+    margin: 0 auto;
+}
+
+/* --- 3. 3D 影史纪念碑系统 (去光效版) --- */
+:root {
+    --mono-w: 160px;
+    --mono-d: 60px;
+}
+
+.history-section {
+    padding: -20px 0;
+    perspective: 3000px;
+    background: rgba(0,0,0,0.01);
+}
+
+.monoliths-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 50px;
+    height: 520px;
+}
+
+.monolith-wrapper {
+    position: relative;
+    width: var(--mono-w);
+}
+
+.monolith {
+    position: relative;
+    width: var(--mono-w);
+    height: var(--h);
+    transform-style: preserve-3d;
+    transform: rotateX(-15deg) rotateY(-25deg);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 垂直升起，干净纯粹的交互 */
+.monolith:hover {
+    transform: rotateX(-15deg) rotateY(-25deg) translateY(-100px);
+}
+
+.m-face {
+    position: absolute;
+    box-sizing: border-box;
+    background-color: var(--color);
+    outline: 1px solid var(--color); /* 消除物理缝隙 */
+}
+
+/* 正面 - 模拟哑光纸张质感 */
+.m-front {
+    width: var(--mono-w);
+    height: 100%;
+    transform: translateZ(calc(var(--mono-d) / 2));
+    z-index: 2;
+    padding: 30px 25px;
+    background: linear-gradient(145deg, var(--color) 0%, rgba(255,255,255,0.2) 100%);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.02);
+}
+
+/* 侧面 - 通过降低亮度产生深度 */
+.m-right {
+    width: var(--mono-d);
+    height: 100%;
+    left: calc(var(--mono-w) - (var(--mono-d) / 2));
+    transform: rotateY(90deg);
+    filter: brightness(0.8); /* 侧面背光，较暗 */
+}
+
+/* 顶面 - 模拟受光面 */
+.m-top {
+    width: var(--mono-w);
+    height: var(--mono-d);
+    top: calc(var(--mono-d) / -2);
+    transform: rotateX(90deg);
+    filter: brightness(1.05); /* 顶部受光，略亮 */
+    box-shadow: inset 0 0 15px rgba(255,255,255,0.3);
+}
+
+/* --- 4. 内部排版与细节 --- */
+.m-content {
+    border-left: 2px solid var(--accent-red);
+    padding-left: 15px;
+    position: relative;
+    height: 100%;
+}
+
+.m-id {
+    font-size: 56px;
+    font-family: 'Playfair Display', serif;
+    color: rgba(0,0,0,0.03); /* 装饰性的巨大数字 */
+    position: absolute;
+    top: -10px; right: -5px;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.m-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: #222;
+    margin: 5px 0;
+    letter-spacing: 0.5px;
+}
+
+.m-year {
+    font-size: 10px;
+    color: var(--accent-red);
+    font-weight: 800;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.m-desc {
+    font-size: 10px;
+    line-height: 1.7;
+    color: #666;
+    text-align: justify;
+    font-weight: 300;
+}
+
+/* 落地阴影 - 随升起而变淡 */
+.m-shadow {
+    position: absolute;
+    bottom: -45px;
+    left: 15px;
+    width: 130px;
+    height: 35px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 75%);
+    transform: rotateX(85deg);
+    transition: all 0.7s ease;
+}
+
+.monolith:hover + .m-shadow {
+    opacity: 0.3;
+    transform: rotateX(85deg) scale(0.6);
+}
